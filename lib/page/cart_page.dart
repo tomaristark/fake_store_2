@@ -1,11 +1,15 @@
 
 import 'package:fake_store/constant/string.dart';
-import 'package:fake_store/data/vos/products_vo.dart';
+import 'package:fake_store/data/model/product_model.dart';
+import 'package:fake_store/data/model/product_model_impl.dart';
+import 'package:fake_store/data/vos/products/product_vo.dart';
+
 import 'package:fake_store/page/cart_product_list.dart';
 import 'package:fake_store/page/home_page.dart';
 import 'package:fake_store/page/product_detail_page.dart';
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+ final ProductModel _productModel = ProductModelImpl();
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
 
@@ -16,11 +20,11 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
 
-// @override
-//   void initState() {
-//     return (cardProductList.isEmpty)?NoItemInCartView():
-//     super.initState();
-//   }
+@override
+  void initState() {
+    return (cardProductList.isEmpty)?NoItemInCartView():
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,7 @@ class ItemInCartView extends StatelessWidget {
       itemCount: itemInCart.length,
       itemBuilder:(_,index){
         return ProductCard(productVo: itemInCart[index],hasTrailing: true,onTap: (){
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductDetailPage(productVO: itemInCart[index])));
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProductDetailPage(slug: itemInCart[index].slug)));
         },
         tapTORemove:(productVO){
             tapTORemove(productVO);

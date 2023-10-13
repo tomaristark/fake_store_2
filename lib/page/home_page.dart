@@ -1,12 +1,18 @@
 import 'package:fake_store/constant/color.dart';
 import 'package:fake_store/constant/dimen.dart';
 import 'package:fake_store/constant/string.dart';
+import 'package:fake_store/data/model/product_model.dart';
+import 'package:fake_store/data/model/product_model_impl.dart';
+import 'package:fake_store/data/vos/products/product_vo.dart';
 import 'package:fake_store/data/vos/products_vo.dart';
 import 'package:fake_store/page/cart_page.dart';
 import 'package:fake_store/page/cart_product_list.dart';
 import 'package:fake_store/page/product_detail_page.dart';
+import 'package:fake_store/utils/extension.dart';
+import 'package:fake_store/utils/random_colors.dart';
 import 'package:flutter/material.dart';
 
+final ProductModel _productModel = ProductModelImpl();
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -15,7 +21,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<ProductVO> productList = [];
+  List<DummyProductVO> productList = [];
 
   @override
   void initState() {
@@ -64,35 +70,44 @@ class _HomePageState extends State<HomePage> {
             ])))
         ],
       ),
-      body: ListView.builder(
-        itemCount: productList.length,
-        itemBuilder: (_,index){
-          // final productVo = products[index];
+      body: FutureBuilder<List<ProductVO>?>(
+        future:_productModel.getAllProducts() , 
+        builder: (context,snapShot){
+          if(snapShot.connectionState == ConnectionState.waiting){
+            return const Center(child: CircularProgressIndicator(),);
+          }
+          if(snapShot.hasError){
+            return  Center(child: Text("adwad  :${snapShot.error}"),);
+          }
+          final result = snapShot.data;
+          return ListView.builder(
+        itemCount: result?.length ?? 0,
+        itemBuilder: (context,index){
           return ProductCard(
             onTap: (){
               Navigator.of(context).push(MaterialPageRoute(builder: (context)=>
-              ProductDetailPage(productVO: productList[index]))
+              ProductDetailPage(slug: result?[index].slug ?? "",))
               ).then((value) {
                 setState(() {       
                 });
               });
             },
-            productVo: productList[index]) ;
-        }),
+            productVo: result?[index]) ;
+        });
+        })
     );
   }
 }
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({
-    super.key,
-    required this.productVo, this.hasTrailing  = false, required this.onTap, this.tapTORemove,
-  });
+ ProductCard({super.key, this.hasTrailing=false, required this.onTap, this.tapTORemove, required this.productVo});
   final bool hasTrailing ;
   // final int index;
-  final ProductVO productVo;
+  ProductVO ? productVo;
   final Function onTap;
   final Function(ProductVO)? tapTORemove;
+
+
 
 
   @override
@@ -104,26 +119,26 @@ class ProductCard extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
           leading: CircleAvatar(
             radius: kSP20x,
-            backgroundColor: kPrimayColor,
-            child: Text( productVo.prodcutID.toString(),style: const TextStyle(
+            backgroundColor: RandomColor.getRandomColor() ,
+            child: Text( productVo?.title.getPrefix() ?? "",style: const TextStyle(
               color: kSecondaryTextColor
             ),),
 
           ),
-          title: Text(productVo.productName),
+          title: Text(productVo?.title ?? ""),
           titleTextStyle: const TextStyle(
             color: kPrimayTextColor,
             fontWeight: FontWeight.bold,
             fontSize:kProductNameFS
           ),
-          subtitle:Text(productVo.prodcutDescription,
+          subtitle:Text(productVo?.description??"",
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
           ) ,
         trailing:(hasTrailing)? GestureDetector(
           onTap: () {
             if(tapTORemove != null){
-              tapTORemove!(productVo);
+              tapTORemove!(productVo!);
             }
             
           },

@@ -1,4 +1,7 @@
-import 'package:fake_store/data/vos/products_vo.dart';
+
+
+import 'package:fake_store/data/vos/products/product_vo.dart';
+
 
 List<ProductVO> cardProductList = [];
 
